@@ -48,6 +48,21 @@ class PhoneNumber {
 		$trim = function ($number) {
 			return preg_replace('/[^0-9]/', '', $number);
 		};
-		return sprintf('+%s.%s.%s', $trim($this->countryCode), $trim($this->areaCode), $trim($this->number));
+
+		$parts = array();
+
+		if($this->countryCode) {
+			$parts[] = sprintf("+%d", $trim($this->countryCode));
+		}
+
+		if($this->areaCode) {
+			$parts[] = $trim($this->areaCode);
+		}
+
+		if($this->number) {
+			$parts[] = $trim($this->number);
+		}
+
+		return join('.', $parts);
 	}
 }
