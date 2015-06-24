@@ -4,16 +4,6 @@ namespace Kir\CanonicalAddresses\PhoneNumbers;
 use Kir\CanonicalAddresses\Common\Culture;
 
 class CanonicalPhoneNumberService {
-	/** @var PhoneNumberCountryCodes */
-	private $countryCodes;
-
-	/**
-	 * @param PhoneNumberCountryCodes $countryCodes
-	 */
-	public function __construct(PhoneNumberCountryCodes $countryCodes) {
-		$this->countryCodes = $countryCodes;
-	}
-
 	/**
 	 * @param string $phoneNumber
 	 * @param Culture $culture
