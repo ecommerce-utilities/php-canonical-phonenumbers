@@ -1,23 +1,28 @@
 <?php
 namespace Kir\CanonicalAddresses\PhoneNumbers;
 
+use Kir\CanonicalAddresses\Common\Culture;
+
 class PhoneNumber {
 	/** @var string */
 	private $countryCode;
 	/** @var string */
 	private $areaCode;
-	/** @var string */
-	private $number;
+	/** @var string[] */
+	private $numbers;
+	/** @var Culture */
+	private $culture;
 
 	/**
 	 * @param string $countryCode
 	 * @param string $areaCode
-	 * @param string $number
+	 * @param string[] $numbers
 	 */
-	public function __construct($countryCode, $areaCode, $number) {
+	public function __construct($countryCode, $areaCode, array $numbers, Culture $culture) {
 		$this->countryCode = $countryCode;
 		$this->areaCode = $areaCode;
-		$this->number = $number;
+		$this->numbers = $numbers;
+		$this->culture = $culture;
 	}
 
 	/**
@@ -35,34 +40,62 @@ class PhoneNumber {
 	}
 
 	/**
+	 * @return string[]
+	 */
+	public function getLocalNumbers() {
+		return $this->numbers;
+	}
+
+	/**
+	 * @param Culture $culture
 	 * @return string
 	 */
-	public function getNumber() {
-		return $this->number;
+	public function toString(Culture $culture) {
+		$fn = $this->getFormatter($culture);
+		return $fn($this->countryCode, $this->areaCode, $this->numbers);
 	}
 
 	/**
 	 * @return string
 	 */
 	public function __toString() {
-		$trim = function ($number) {
-			return preg_replace('/[^0-9]/', '', $number);
-		};
+		return $this->toString($this->culture);
+	}
 
-		$parts = array();
-
-		if($this->countryCode) {
-			$parts[] = sprintf("+%d", $trim($this->countryCode));
+	/**
+	 * @param Culture $culture
+	 * @return callable
+	 */
+	private function getFormatter(Culture $culture) {
+		static $cache = array();
+		if(!array_key_exists((string) $culture, $cache)) {
+			if($this->hasFile((string) $culture)) {
+				$cache[(string) $culture] = $this->incl((string)$culture);
+			} elseif($this->hasFile('fallback')) {
+				$cache[(string) $culture] = $this->incl('fallback');
+			} else {
+				$cache[(string) $culture] = null;
+			}
 		}
+		return $cache[(string) $culture];
+	}
 
-		if($this->areaCode) {
-			$parts[] = $trim($this->areaCode);
-		}
+	/**
+	 * @param string $type
+	 * @return bool
+	 */
+	private function hasFile($type) {
+		$filename = __DIR__ . "/formatters/{$type}.php";
+		return file_exists($filename);
+	}
 
-		if($this->number) {
-			$parts[] = $trim($this->number);
-		}
-
-		return join('.', $parts);
+	/**
+	 * @param string $type
+	 * @return bool
+	 */
+	private function incl($type) {
+		$filename = __DIR__ . "/formatters/{$type}.php";
+		/** @noinspection PhpIncludeInspection */
+		return require $filename;
 	}
 }

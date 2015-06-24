@@ -4120,5 +4120,5 @@ return function ($phoneNumber) {
 		case $startsWith($ndcs2, 2): list($areaCode, $phoneNumber) = $split($phoneNumber, 2); break;
 	}
 
-	return new PhoneNumber($countryPhoneCode, $areaCode, $phoneNumber);
+	return array($countryPhoneCode, $areaCode, $phoneNumber);
 };

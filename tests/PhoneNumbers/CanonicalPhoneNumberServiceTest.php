@@ -19,7 +19,18 @@ class CanonicalPhoneNumberServiceTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('+49.4122.1234567', (string) $phoneNumber);
 
 		// Non-German number
+		$culture = new Culture('DE', 'de');
 		$phoneNumber = $service->getCanonicalPhoneNumber('1-222-333-4444', $culture);
-		$this->assertEquals('1-222-333-4444', (string) $phoneNumber);
+		$this->assertEquals('+49.12223334444', (string) $phoneNumber);
+
+		// US phone number 1
+		$culture = new Culture('US', 'en');
+		$phoneNumber = $service->getCanonicalPhoneNumber('1-222-333-4444', $culture);
+		$this->assertEquals('+1.222.333.4444', (string) $phoneNumber);
+
+		// US phone number 2
+		$culture = new Culture('US', 'en');
+		$phoneNumber = $service->getCanonicalPhoneNumber('222-333-4444', $culture);
+		$this->assertEquals('+1.222.333.4444', (string) $phoneNumber);
 	}
 }
