@@ -23,7 +23,7 @@ class CanonicalPhoneNumberServiceTest extends \PHPUnit_Framework_TestCase {
 	 */
 	public function testGermanNumbers() {
 		$culture = new Culture('DE', 'de');
-		$service = new CanonicalPhoneNumberService(new PhoneNumberCountryCodes());
+		$service = new CanonicalPhoneNumberService();
 		$phoneNumber = $service->getCanonicalPhoneNumber('+49 30 12345678', $culture);
 		$this->assertEquals('+49.30.12345678', (string) $phoneNumber);
 		$phoneNumber = $service->getCanonicalPhoneNumber('030 12345678', $culture);
