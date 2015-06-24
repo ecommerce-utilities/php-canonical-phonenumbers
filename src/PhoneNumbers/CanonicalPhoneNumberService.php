@@ -15,11 +15,11 @@ class CanonicalPhoneNumberService {
 	}
 
 	/**
-	 * @param Culture $culture
 	 * @param string $phoneNumber
+	 * @param Culture $culture
 	 * @return PhoneNumber
 	 */
-	public function getCanonicalPhoneNumber(Culture $culture, $phoneNumber) {
+	public function getCanonicalPhoneNumber($phoneNumber, Culture $culture) {
 		$phoneNumber = trim($phoneNumber);
 		$fn = $this->getParser($culture);
 		$pn = call_user_func($fn, $phoneNumber);
