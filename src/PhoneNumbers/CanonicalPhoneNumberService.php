@@ -1,9 +1,24 @@
 <?php
 namespace Kir\CanonicalAddresses\PhoneNumbers;
 
+use Ioc\ObjectFactory;
 use Kir\CanonicalAddresses\Common\Culture;
 
 class CanonicalPhoneNumberService {
+	/** @var object[] */
+	private $objectCache = [];
+
+	/** @var array */
+	private $parsers = [
+		'DE' => '\\Kir\\CanonicalAddresses\\PhoneNumbers\\Parsers\\PhoneNumberParserGermany',
+		'US' => '\\Kir\\CanonicalAddresses\\PhoneNumbers\\Parsers\\PhoneNumberParserUnitedStates',
+	];
+
+	private $countryPhoneCodeMap = [
+		'1' => 'US',
+		'49' => 'DE',
+	];
+
 	/**
 	 * @param string $phoneNumber
 	 * @param Culture $culture
@@ -11,48 +26,32 @@ class CanonicalPhoneNumberService {
 	 */
 	public function getCanonicalPhoneNumber($phoneNumber, Culture $culture) {
 		$phoneNumber = trim($phoneNumber);
-		$fn = $this->getParser($culture);
-		if($fn === null) {
-			return new PhoneNumber(null, null, $phoneNumber, $culture);
+		$parser = $this->getParser($culture->getCountryCode());
+		list($countryPhoneCode, $phoneNumber) = $parser->parseCountryPhoneCode($phoneNumber);
+		if($countryPhoneCode === null) {
+			$countryPhoneCode = $parser->getDefaultCountryPhoneCode();
 		}
-		$pn = call_user_func($fn, $phoneNumber);
-		return new PhoneNumber($pn[0], $pn[1], array_slice($pn, 2), $culture);
+		if(!array_key_exists($countryPhoneCode, $this->countryPhoneCodeMap)) {
+			return new PhoneNumber($countryPhoneCode, null, [$phoneNumber], $culture);
+		}
+		$countryCode = $this->countryPhoneCodeMap[$countryPhoneCode];
+		$parser = $this->getParser($countryCode);
+		$parts = $parser->parsePhoneNumber($countryPhoneCode, $phoneNumber);
+		return new PhoneNumber($parts[0], $parts[1], array_slice($parts, 2), $culture);
 	}
 
 	/**
-	 * @param Culture $culture
-	 * @return array
+	 * @param string $type
+	 * @return Parser
 	 */
-	private function getParser(Culture $culture) {
-		static $cache = array();
-		if(!array_key_exists((string) $culture, $cache)) {
-			if($this->hasFile((string) $culture)) {
-				$cache[(string) $culture] = $this->incl((string)$culture);
-			} elseif($this->hasFile('fallback')) {
-				$cache[(string) $culture] = $this->incl('fallback');
-			} else {
-				$cache[(string) $culture] = null;
+	private function getParser($type) {
+		if(array_key_exists($type, $this->parsers)) {
+			$className = $this->parsers[$type];
+			if(!array_key_exists($className, $this->objectCache)) {
+				$this->objectCache[$className] = new $className();
 			}
+			return $this->objectCache[$className];
 		}
-		return $cache[(string) $culture];
-	}
-
-	/**
-	 * @param string $type
-	 * @return bool
-	 */
-	private function hasFile($type) {
-		$filename = __DIR__ . "/parsers/{$type}.php";
-		return file_exists($filename);
-	}
-
-	/**
-	 * @param string $type
-	 * @return bool
-	 */
-	private function incl($type) {
-		$filename = __DIR__ . "/parsers/{$type}.php";
-		/** @noinspection PhpIncludeInspection */
-		return require $filename;
+		return null;
 	}
 }
