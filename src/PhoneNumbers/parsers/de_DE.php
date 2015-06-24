@@ -8,7 +8,7 @@ use Kir\CanonicalAddresses\PhoneNumbers\PhoneNumber;
 return function ($phoneNumber) {
 	$phoneNumber = preg_replace('/[^0-9\\+]+/', ' ', $phoneNumber);
 
-	if(preg_match('/^(?:\\+\\s*|00)(\\d+)(.*)$/', $phoneNumber, $matches)) {
+	if(preg_match('/^(?:\\+49|\\+\\s*|00)(\\d+)(.*)$/', $phoneNumber, $matches)) {
 		$number = trim($matches[2]);
 		$number = ltrim($number, '0');
 		$countryPhoneCode = trim($matches[1]);
