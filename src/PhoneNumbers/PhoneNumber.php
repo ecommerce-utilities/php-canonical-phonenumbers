@@ -17,6 +17,7 @@ class PhoneNumber {
 	 * @param string $countryCode
 	 * @param string $areaCode
 	 * @param string[] $numbers
+	 * @param Culture $culture
 	 */
 	public function __construct($countryCode, $areaCode, array $numbers, Culture $culture) {
 		$this->countryCode = $countryCode;
@@ -85,7 +86,7 @@ class PhoneNumber {
 	 * @return bool
 	 */
 	private function hasFile($type) {
-		$filename = __DIR__ . "/formatters/{$type}.php";
+		$filename = __DIR__ . "/Formatters/{$type}.php";
 		return file_exists($filename);
 	}
 
@@ -94,7 +95,7 @@ class PhoneNumber {
 	 * @return bool
 	 */
 	private function incl($type) {
-		$filename = __DIR__ . "/formatters/{$type}.php";
+		$filename = __DIR__ . "/Formatters/{$type}.php";
 		/** @noinspection PhpIncludeInspection */
 		return require $filename;
 	}
