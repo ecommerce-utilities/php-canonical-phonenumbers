@@ -4,6 +4,7 @@
 !/.editorconfig
 !/.gitattributes
 !/.gitignore
+!/.travis.yml
 !/composer.json
 !/LICENSE
 !/README.md
