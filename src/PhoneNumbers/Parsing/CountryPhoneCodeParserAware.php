@@ -244,24 +244,19 @@ trait CountryPhoneCodeParserAware {
 	 */
 	public function parseCountryPhoneCode($phoneNumber) {
 		$payload = preg_replace('/[^\\+\\d]+/', '', $phoneNumber);
-		if(preg_match('/(?:\\+|00)(\\d{1,3})(.*)$/', $payload, $matches)) {
-			$code = $matches[1];
-			if(in_array($code, $this->countryCodes)) {
-				return [$code, $matches[2]];
-			}
-		};
-		if(preg_match('/(?:\\+|00)(\\d{1,2})(.*)$/', $payload, $matches)) {
-			$code = $matches[1];
-			if(in_array($code, $this->countryCodes)) {
-				return [$code, $matches[2]];
-			}
-		};
-		if(preg_match('/(?:\\+|00)(\\d{1})(.*)$/', $payload, $matches)) {
-			$code = $matches[1];
-			if(in_array($code, $this->countryCodes)) {
-				return [$code, $matches[2]];
-			}
-		};
+		$patterns = [
+			'/(?:\\+|00)(\\d{1,3})(.*)$/',
+			'/(?:\\+|00)(\\d{1,2})(.*)$/',
+			'/(?:\\+|00)(\\d{1})(.*)$/',
+		];
+		foreach($patterns as $pattern) {
+			if(preg_match($pattern, $payload, $matches)) {
+				$code = $matches[1];
+				if(in_array($code, $this->countryCodes)) {
+					return [$code, $matches[2]];
+				}
+			};
+		}
 		return [null, $phoneNumber];
 	}
 }

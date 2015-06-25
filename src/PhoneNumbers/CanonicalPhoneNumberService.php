@@ -26,11 +26,7 @@ class CanonicalPhoneNumberService {
 	 */
 	public function getCanonicalPhoneNumber($phoneNumber, Culture $culture) {
 		$phoneNumber = trim($phoneNumber);
-		$parser = $this->getParser($culture->getCountryCode());
-		list($countryPhoneCode, $phoneNumber) = $parser->parseCountryPhoneCode($phoneNumber);
-		if($countryPhoneCode === null) {
-			$countryPhoneCode = $parser->getDefaultCountryPhoneCode();
-		}
+		list($countryPhoneCode, $phoneNumber) = $this->getCountryPhoneCode($phoneNumber, $culture);
 		if(!array_key_exists($countryPhoneCode, $this->countryPhoneCodeMap)) {
 			return new PhoneNumber($countryPhoneCode, null, [$phoneNumber], $culture);
 		}
@@ -38,6 +34,20 @@ class CanonicalPhoneNumberService {
 		$parser = $this->getParser($countryCode);
 		$parts = $parser->parsePhoneNumber($countryPhoneCode, $phoneNumber);
 		return new PhoneNumber($parts[0], $parts[1], array_slice($parts, 2), $culture);
+	}
+
+	/**
+	 * @param string $phoneNumber
+	 * @param Culture $culture
+	 * @return array
+	 */
+	protected function getCountryPhoneCode($phoneNumber, Culture $culture) {
+		$parser = $this->getParser($culture->getCountryCode());
+		list($countryPhoneCode, $phoneNumber) = $parser->parseCountryPhoneCode($phoneNumber);
+		if($countryPhoneCode === null) {
+			$countryPhoneCode = $parser->getDefaultCountryPhoneCode();
+		}
+		return [$countryPhoneCode, $phoneNumber];
 	}
 
 	/**
